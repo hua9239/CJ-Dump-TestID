@@ -6,7 +6,8 @@ email = config["email"]
 password = config["password"]
 classID = config["classID"]
 examID = config["examID"]
-testRange = [config["testRange"]["start"], config["testRange"]["end"]]
+testRange = [int(config["testRange"]["start"]),
+             int(config["testRange"]["end"])]
 
 
 TARGET_URL = f"https://cloud.judge.com.tw/course/{classID}/exam/{examID}/problem/"
