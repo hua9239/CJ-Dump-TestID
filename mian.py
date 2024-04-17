@@ -1,10 +1,12 @@
 import requests
+import json
 
-email = ''  # 輸入你的帳號
-password = ''   # 輸入你的密碼
-classID = ''    # 輸入有效的課程編號 參考 TARGET_URL
-examID = ''     # 輸入有效的考試編號 參考 TARGET_URL
-testRange = [5000, 5601]    # 輸入測試範圍
+config = json.load(open("config.json", "r", encoding='utf-8'))
+email = config["email"]
+password = config["password"]
+classID = config["classID"]
+examID = config["examID"]
+testRange = [config["testRange"]["start"], config["testRange"]["end"]]
 
 
 TARGET_URL = f"https://cloud.judge.com.tw/course/{classID}/exam/{examID}/problem/"
@@ -15,6 +17,7 @@ def login(email, password):
     global cookies
     # 進入登入頁面 獲取 cookies 和 token
     response = requests.get('https://cloud.judge.com.tw/login')
+    response.encoding = 'utf-8'
     cookies = response.cookies.get_dict()
     token = response.text.split('name="_token" value="')[1].split('">')[0]
 
@@ -24,6 +27,7 @@ def login(email, password):
         'email': email,
         'password': password,
     })
+    response.encoding = 'utf-8'
 
     # 嘗試獲取名字 如果失敗則登入失敗
     try:
@@ -38,6 +42,14 @@ def login(email, password):
     # 更新全域變數 cookies
     cookies = response.cookies.get_dict()
     # print(cookies)
+
+
+def logout():   # 登出
+    global cookies
+    response = requests.get(
+        'https://cloud.judge.com.tw/logout', cookies=cookies)
+    print(f"Logout")
+    cookies = {}
 
 
 def readLastID():   # 讀取上次的最後一個測試編號
@@ -58,9 +70,16 @@ def fetchTestTitles():  # 爬取測試標題
 
         # 請求目標網頁
         response = requests.get(TARGET_URL + str(testID), cookies=cookies)
+        # status_code
+        # 200 => OK
+        # 302 => 登入失敗
+        # 500 => 查無此題
 
         # 如果請求失敗則略過
-        if response.status_code != 200:
+        if response.status_code == 302:
+            print("Login failed.")
+            exit()
+        elif response.status_code == 500:
             continue
 
         # 設定編碼
@@ -81,8 +100,11 @@ def fetchTestTitles():  # 爬取測試標題
         with open("result.txt", "a", encoding='utf-8') as f:
             f.write(f"{testID:4d}, {title}\n")
 
+    print("\ncompleted!")
+
 
 if __name__ == "__main__":
     login(email, password)  # 登入
     readLastID()        # 讀取上次的最後一個測試編號
     fetchTestTitles()   # 爬取測試標題
+    logout()            # 登出
