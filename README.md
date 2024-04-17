@@ -11,13 +11,13 @@ pip install requests
 ```
 
 ## Usage 使用方法
-於 `main.py` 中，輸入 CloudJudge 的帳號密碼，對應 `email` 和 `password`。
+於 `config.json` 中，設置 CloudJudge 的帳號密碼，對應 `email` 和 `password`。
 
 以及當前可用的 課程ID 及 題目ID，對應 `classID` 和 `examID`。
 
 詳細方式可參考 `main.py` 中的註解。
 
-輸入測試範圍 `testRange`，即可執行。
+輸入測試範圍 `testRange` 的起始值 `start`，以及終止值 `end`。
 
 執行中會於當前目錄下產生一個 `result.txt`，內容為測試結果。
 
